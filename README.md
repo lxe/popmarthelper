@@ -31,11 +31,10 @@ A powerful bookmarklet for tracking and analyzing POP MART sets with automated n
 ## 🚀 Quick Start
 
 ### Installation
-1. **Online**: Visit **[https://lxe.github.io/popmarthelper/](https://lxe.github.io/popmarthelper/)** for the online installer
-2. **Local**: Open [bookmarklet.html](./bookmarklet.html) in your browser
-3. Drag the **"POP MART Helper"** button to your bookmarks toolbar
-4. Navigate to any POP MART product page (ending with `/pop-now/set/{id}`)
-5. Click the bookmarklet to activate
+1. Visit **[https://lxe.github.io/popmarthelper/](https://lxe.github.io/popmarthelper/)** for the online installer
+2. Drag the **"POP MART Helper"** button to your bookmarks toolbar
+3. Navigate to any POP MART product page (ending with `/pop-now/set/{id}`)
+4. Click the bookmarklet to activate
 
 ### Usage
 1. **Start Automation**: Click "Start" on a product page to begin set discovery
