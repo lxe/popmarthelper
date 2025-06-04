@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POP MART Helper Bookmarklet</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .bookmarklet {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            margin: 20px 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: grab;
+        }
+        .bookmarklet:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .bookmarklet:active {
+            cursor: grabbing;
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+            margin: 20px 0;
+        }
+        .code-block {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .stats {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        h1 { color: #333; margin-bottom: 10px; }
+        h2 { color: #555; margin-top: 30px; }
+        .emoji { font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="emoji">🎁</span> POP MART Helper Bookmarklet</h1>
+        <p>Drag the button below to your bookmarks toolbar to install the POP MART Helper.</p>
+        
+        <div class="instructions">
+            <h3><span class="emoji">📋</span> Installation Instructions:</h3>
+            <ol>
+                <li><strong>Drag the bookmarklet:</strong> Click and drag the blue button below to your browser's bookmarks toolbar</li>
+                <li><strong>Navigate to POP MART:</strong> Go to any POP MART product page (ending with /pop-now/set/{id})</li>
+                <li><strong>Activate:</strong> Click the bookmarklet in your toolbar to launch the helper</li>
+            </ol>
+        </div>
+
+        <!-- The Bookmarklet Button -->
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="javascript:(function(){var script = document.createElement('script');script.src = 'https://cdn.jsdelivr.net/npm/popmarthelper@latest/dist/script.js?v=' + Date.now();script.onload = function() { console.log('✅ POP MART Helper loaded from CDN'); };script.onerror = function() { console.error('❌ Failed to load POP MART Helper from CDN'); };document.head.appendChild(script);})();" class="bookmarklet" title="Drag me to your bookmarks toolbar!">
+                <span class="emoji">🚀</span> POP MART Helper
+            </a>
+        </div>
+
+        <div class="stats">
+            <h3><span class="emoji">📊</span> CDN Distribution:</h3>
+            <ul>
+                <li><strong>CDN URL:</strong> <code>https://cdn.jsdelivr.net/npm/popmarthelper@latest/dist/script.js</code></li>
+                <li><strong>Package:</strong> <code>npm install popmarthelper</code></li>
+                <li><strong>Auto-updates:</strong> Bookmarklet always loads the latest published version</li>
+                <li><strong>No caching issues:</strong> Updates are available immediately after npm publish</li>
+            </ul>
+        </div>
+
+        <div class="warning">
+            <h3><span class="emoji">⚠️</span> Important Notes:</h3>
+            <ul>
+                <li>This bookmarklet loads the script from jsDelivr CDN</li>
+                <li>Make sure to be on a POP MART product page before activating</li>
+                <li>The script will create a helper overlay in the bottom right corner</li>
+                <li>Use responsibly and in accordance with POP MART's terms of service</li>
+            </ul>
+        </div>
+
+        <h2><span class="emoji">🔧</span> Features:</h2>
+        <ul>
+            <li><strong>🎯 Clickable Sets:</strong> Click any discovered set to open it in a new tab</li>
+            <li><strong>💡 Smart Highlighting:</strong> Middle numbers highlighted in yellow within set IDs</li>
+            <li><strong>📊 Range Analysis:</strong> Find all missing items in discovered ranges with direct links</li>
+            <li><strong>🎮 Inline Controls:</strong> All buttons conveniently laid out in a single row</li>
+            <li><strong>🤖 Smart Navigation:</strong> Automated clicking and set progression</li>
+            <li><strong>📦 Stock Monitoring:</strong> Wait for out-of-stock items to become available</li>
+            <li><strong>💾 Local Storage:</strong> Saves set records per product page</li>
+            <li><strong>🎨 Visual Feedback:</strong> Hover effects and element highlighting</li>
+            <li><strong>🔄 Real-time Updates:</strong> Analysis updates as new sets are discovered</li>
+            <li><strong>📱 Version Display:</strong> Shows current version in helper title</li>
+        </ul>
+
+        <h2><span class="emoji">🚀</span> What's New:</h2>
+        <ul>
+            <li><strong>✨ Enhanced Interactions:</strong> Sets are now clickable with hover effects</li>
+            <li><strong>🎯 Better Visibility:</strong> Middle numbers highlighted instead of parentheses</li>
+            <li><strong>🎛️ Streamlined UI:</strong> All control buttons in one convenient row</li>
+            <li><strong>⚡ Always Fresh:</strong> Cache busting ensures you get the latest version</li>
+            <li><strong>📋 CDN Distribution:</strong> Fast, reliable loading from global CDN</li>
+            <li><strong>🔢 Version Tracking:</strong> See exactly which version you're running</li>
+        </ul>
+
+        <h2><span class="emoji">🛠️</span> Development:</h2>
+        <div class="code-block">
+# Publish new version:
+npm run deploy    # Increments version and publishes
+
+# CDN automatically updates:
+https://cdn.jsdelivr.net/npm/popmarthelper@latest/dist/script.js
+
+# Cache busting ensures immediate updates
+# Version info displayed in helper UI
+        </div>
+        
+        <p style="margin-top: 40px; text-align: center; color: #666; font-size: 14px;">
+            Always up to date via CDN | 
+            <a href="https://github.com/lxe/popmarthelper" style="color: #666;">View Source</a>
+        </p>
+    </div>
+
+    <script>
+        // Add some interactivity
+        document.querySelector('.bookmarklet').addEventListener('dragstart', function(e) {
+            e.dataTransfer.setData('text/plain', this.href);
+        });
+        
+        // Show install success message
+        let installMessage = null;
+        document.querySelector('.bookmarklet').addEventListener('click', function(e) {
+            if (!installMessage) {
+                installMessage = document.createElement('div');
+                installMessage.style.cssText = `
+                    position: fixed; top: 20px; right: 20px; background: #4caf50; color: white;
+                    padding: 15px; border-radius: 8px; z-index: 10000; font-weight: bold;
+                    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+                `;
+                installMessage.textContent = '✅ Bookmarklet activated! (Or drag to toolbar to install)';
+                document.body.appendChild(installMessage);
+                
+                setTimeout(() => {
+                    if (installMessage) {
+                        installMessage.remove();
+                        installMessage = null;
+                    }
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html> 
