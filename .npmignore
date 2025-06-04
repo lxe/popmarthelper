@@ -1,0 +1,10 @@
+# Development files
+build.js
+bookmarklet.html
+node_modules/
+*.log
+
+# Only include dist/ and package files
+!dist/
+!package.json
+!README.md 
