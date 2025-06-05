@@ -1,6 +1,6 @@
 {
   "name": "popmarthelper",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "POP MART Helper bookmarklet for set tracking and automation",
   "main": "dist/script.js",
   "files": [
@@ -21,7 +21,7 @@
   "license": "WTFPL",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lxe/popmarthelper.git"
+    "url": "git+https://github.com/lxe/popmarthelper.git"
   },
   "homepage": "https://github.com/lxe/popmarthelper#readme"
 }
