@@ -53,6 +53,7 @@
   window.popmartHelper = {
     isRunning: false,
     isWaitingForStock: false,
+    isWaitingForCurrent: false,
     setRecords: {},
     lastSetNo: null,
     currentUrl: window.location.href,
@@ -287,7 +288,9 @@
       <button id="toggleBtn">Start</button>
       <button id="resetBtn">Reset</button>
       <button id="waitStockBtn">Wait Until In Stock</button>
+      <button id="waitForCurrentBtn">Wait for Current</button>
       <button id="setVisualizerToggle">Hide Sets</button>
+      <button id="testNavBtn">Test Nav</button>
       <button id="jsonToggle" style="font-weight:bold; color:black; background:white;
         border:none; padding:6px 12px; border-radius:6px; cursor:pointer;
         box-shadow:0 2px 4px rgba(0,0,0,0.2);">Toggle JSON</button>
@@ -302,7 +305,7 @@
   document.body.appendChild(overlay);
 
   // Style the control buttons
-  ['toggleBtn', 'resetBtn', 'waitStockBtn', 'setVisualizerToggle', 'jsonToggle'].forEach(id => {
+  ['toggleBtn', 'resetBtn', 'waitStockBtn', 'waitForCurrentBtn', 'setVisualizerToggle', 'testNavBtn', 'jsonToggle'].forEach(id => {
     const btn = document.getElementById(id);
     btn.style = `
       font-weight: bold; color: black; background: white; border: none;
@@ -682,19 +685,41 @@
     // Highlight the element first
     highlightElement(element);
     
-    // Create and dispatch synthetic click events
-    const events = ['mousedown', 'mouseup', 'click'];
-    events.forEach(eventType => {
-      const event = new MouseEvent(eventType, {
-        bubbles: true,
-        cancelable: true,
-        view: window
-      });
-      element.dispatchEvent(event);
-    });
+    // Create more realistic mouse interaction sequence
+    const mouseEvents = [
+      'mouseover',
+      'mouseenter', 
+      'mousemove',
+      'mousedown',
+      'mouseup',
+      'click'
+    ];
     
-    // Also try the regular click as backup
-    // setTimeout(() => element.click(), 50);
+    // Add small delays between events for more realistic timing
+    mouseEvents.forEach((eventType, index) => {
+      setTimeout(() => {
+        const event = new MouseEvent(eventType, {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+          detail: eventType === 'click' ? 1 : 0,
+          button: 0,
+          buttons: eventType === 'mousedown' ? 1 : 0
+        });
+        element.dispatchEvent(event);
+        
+        // Also try native click as fallback after synthetic events
+        if (eventType === 'click') {
+          setTimeout(() => {
+            try {
+              element.click();
+            } catch (e) {
+              console.log('🔄 Native click fallback failed:', e);
+            }
+          }, 10);
+        }
+      }, index * 10); // 10ms between each event
+    });
   }
 
   function clickNextArrow() {
@@ -761,8 +786,9 @@
       return;
     }
     
-    // Stop stock waiting if it's active
+    // Stop all waiting modes if they're active
     stopStockWait();
+    stopCurrentWait();
     
     window.popmartHelper.isRunning = true;
     isRunning = true;
@@ -779,6 +805,8 @@
 
   document.getElementById('toggleBtn').onclick = toggleScript;
   document.getElementById('waitStockBtn').onclick = toggleStockWaiting;
+  document.getElementById('waitForCurrentBtn').onclick = toggleCurrentWaiting;
+  document.getElementById('testNavBtn').onclick = testMobxNavigation;
 
   // Initialize button states
   updateStockButtonState();
@@ -874,6 +902,26 @@
       stockBtn.style.cursor = 'pointer';
       stockBtn.style.opacity = '1';
     }
+    
+    // Update wait for current button
+    const currentBtn = document.getElementById('waitForCurrentBtn');
+    if (!currentBtn) return;
+    
+    if (window.popmartHelper.isWaitingForCurrent) {
+      currentBtn.textContent = 'Stop Waiting for Current';
+      currentBtn.disabled = false;
+      currentBtn.style.background = '#17a2b8'; // Teal background
+      currentBtn.style.color = 'white';
+      currentBtn.style.cursor = 'pointer';
+      currentBtn.style.opacity = '1';
+    } else {
+      currentBtn.textContent = 'Wait for Current';
+      currentBtn.disabled = false;
+      currentBtn.style.background = 'white';
+      currentBtn.style.color = 'black';
+      currentBtn.style.cursor = 'pointer';
+      currentBtn.style.opacity = '1';
+    }
   }
 
   function toggleStockWaiting() {
@@ -889,29 +937,27 @@
     window.popmartHelper.isWaitingForStock = true;
     updateStockButtonState();
     
-    // Find and click element with class starting with "header_logo"
-    const headerLogoElement = findByClassPrefix('header_logo').find(el => isElementVisible(el));
+    const introBtn = findByClassPrefix('index_introductionBtn').find(el => isElementVisible(el));
     
-    if (headerLogoElement) {
-      console.log('🏠 Clicking header logo element');
-      highlightElement(headerLogoElement, 1000);
-      syntheticClick(headerLogoElement);
+    if (introBtn) {
+      console.log('ℹ️ Clicking introduction button');
+      syntheticClick(introBtn);
       
-      // Wait 5 seconds then simulate back button
+      // Wait 1 second then simulate back button
       const timeoutId1 = setTimeout(() => {
         if (!window.popmartHelper.isWaitingForStock) return;
         console.log('⬅️ Simulating back button press');
         window.history.back();
         
-        // After back navigation, start polling for next arrow
+        // After back navigation, start polling for next arrow for 2 seconds
         const timeoutId2 = setTimeout(() => {
           startArrowPolling();
         }, 500);
         trackTimeout(timeoutId2);
-      }, 5000);
+      }, 1000);
       trackTimeout(timeoutId1);
     } else {
-      console.log('❌ Header logo element not found, retrying in 2 seconds...');
+      console.log('❌ Introduction button not found, retrying in 2 seconds...');
       const timeoutId = setTimeout(waitUntilInStock, 2000);
       trackTimeout(timeoutId);
     }
@@ -966,21 +1012,14 @@
       window.popmartHelper.isWaitingForStock = false;
       updateStockButtonState();
       
-      // Navigate back to product page if not already there
-      // Check if we're currently on the main product page by looking for next arrow
-      const nextBtns = findByClassPrefix('index_nextImg');
-      const hasVisibleArrow = nextBtns.some(el => el.tagName === 'IMG' && isElementVisible(el));
-      
-      if (!hasVisibleArrow) {
-        console.log('⬅️ Navigating back to product page...');
+      // Check if we're currently on a product page using URL pattern
+      if (!isOnProductPage()) {
+        console.log('⬅️ Not on product page, navigating back...');
         window.history.back();
         
-        // Wait a moment for navigation to complete, then check if we're on the right page
+        // Wait a moment for navigation to complete, then verify
         const timeoutId = setTimeout(() => {
-          const nextBtnsAfterBack = findByClassPrefix('index_nextImg');
-          const hasArrowAfterBack = nextBtnsAfterBack.some(el => el.tagName === 'IMG' && isElementVisible(el));
-          
-          if (hasArrowAfterBack) {
+          if (isOnProductPage()) {
             console.log('✅ Successfully returned to product page');
           } else {
             console.log('⚠️ May not be on product page yet, but stock waiting is stopped');
@@ -988,7 +1027,7 @@
         }, 1000);
         trackTimeout(timeoutId);
       } else {
-        console.log('✅ Already on product page');
+        console.log('✅ Already on product page, no navigation needed');
       }
     }
   }
@@ -1001,8 +1040,9 @@
     window.popmartHelper.isRunning = false;
     isRunning = false;
     
-    // Stop stock waiting
+    // Stop all waiting modes
     window.popmartHelper.isWaitingForStock = false;
+    window.popmartHelper.isWaitingForCurrent = false;
     
     // Clear any stored timeout IDs (we'll need to track these)
     if (window.popmartHelper.activeTimeouts) {
@@ -1069,4 +1109,184 @@
 
   // Initialize the product page link
   updateProductPageLink();
+
+  // Test mobx navigation function
+  function testMobxNavigation() {
+    console.log('🧪 Testing mobx navigation to /us');
+    
+    try {
+      // Method 1: Try to find mobx router in window
+      if (window.__mobxRouter) {
+        console.log('📍 Found __mobxRouter, trying to navigate...');
+        window.__mobxRouter.push('/us');
+        return;
+      }
+      
+      // Method 2: Try to find react router
+      if (window.__reactRouter) {
+        console.log('📍 Found __reactRouter, trying to navigate...');
+        window.__reactRouter.push('/us');
+        return;
+      }
+      
+      // Method 3: Try to find router in React DevTools
+      if (window.React && window.React.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED) {
+        console.log('📍 Trying React internals navigation...');
+        // This is more complex and site-specific
+      }
+      
+      // Method 4: Try to dispatch a custom navigation event
+      console.log('📍 Trying custom navigation event...');
+      const navEvent = new CustomEvent('navigate', {
+        detail: { path: '/us' },
+        bubbles: true
+      });
+      document.dispatchEvent(navEvent);
+      
+      // Method 5: Try window.history with state
+      console.log('📍 Trying history.pushState...');
+      window.history.pushState({ mobxNav: true }, '', '/us');
+      
+      // Method 6: Try to trigger popstate
+      setTimeout(() => {
+        console.log('📍 Triggering popstate event...');
+        window.dispatchEvent(new PopStateEvent('popstate', { state: { mobxNav: true } }));
+      }, 100);
+      
+      // Method 7: Look for mobx stores in window
+      Object.keys(window).forEach(key => {
+        if (key.includes('store') || key.includes('Store') || key.includes('router') || key.includes('Router')) {
+          console.log(`📍 Found potential store/router: ${key}`, window[key]);
+        }
+      });
+      
+    } catch (error) {
+      console.error('❌ Navigation test failed:', error);
+    }
+  }
+
+  function toggleCurrentWaiting() {
+    if (window.popmartHelper.isWaitingForCurrent) {
+      stopCurrentWait();
+    } else {
+      waitForCurrent();
+    }
+  }
+
+  function waitForCurrent() {
+    console.log('📦 Starting wait for current set routine');
+    window.popmartHelper.isWaitingForCurrent = true;
+    // Stop other waiting modes
+    window.popmartHelper.isWaitingForStock = false;
+    updateStockButtonState();
+    
+    // Start the cart -> back loop
+    navigateToCartAndBack();
+  }
+
+  function navigateToCartAndBack() {
+    if (!window.popmartHelper.isWaitingForCurrent) return;
+    
+    const introBtn = findByClassPrefix('index_introductionBtn').find(el => isElementVisible(el));
+    
+    if (introBtn) {
+      console.log('ℹ️ Clicking introduction button for current set check');
+      syntheticClick(introBtn);
+      
+      // Wait 1 second then simulate back button
+      const timeoutId1 = setTimeout(() => {
+        if (!window.popmartHelper.isWaitingForCurrent) return;
+        console.log('⬅️ Simulating back button press');
+        window.history.back();
+        
+        // After back navigation, start polling for clickable box for 2 seconds
+        const timeoutId2 = setTimeout(() => {
+          startBoxPolling();
+        }, 500);
+        trackTimeout(timeoutId2);
+      }, 1000);
+      trackTimeout(timeoutId1);
+    } else {
+      console.log('❌ Introduction button not found, retrying in 2 seconds...');
+      const timeoutId = setTimeout(navigateToCartAndBack, 2000);
+      trackTimeout(timeoutId);
+    }
+  }
+
+  function startBoxPolling() {
+    if (!window.popmartHelper.isWaitingForCurrent) return;
+    
+    console.log('🔍 Starting box polling for 2 seconds...');
+    const startTime = Date.now();
+    const pollDuration = 2000; // 2 seconds
+    const pollInterval = 100; // Check every 100ms
+    
+    function pollForBox() {
+      if (!window.popmartHelper.isWaitingForCurrent) return;
+      
+      // Look for box image that can be clicked
+      const bigBoxContainer = Array.from(document.querySelectorAll('*')).find(el => 
+        Array.from(el.classList).some(cls => cls.startsWith('index_bigBoxContainer'))
+      );
+      
+      if (bigBoxContainer) {
+        const boxImage = bigBoxContainer.querySelector('img[src*="box_pic"]');
+        
+        if (boxImage && isElementVisible(boxImage)) {
+          console.log('✅ Found clickable box! Starting add to cart flow...');
+          window.popmartHelper.isWaitingForCurrent = false;
+          updateStockButtonState();
+          
+          // Click the box and start the normal flow
+          syntheticClick(boxImage);
+          return;
+        }
+      }
+      
+      const elapsed = Date.now() - startTime;
+      if (elapsed < pollDuration) {
+        // Continue polling
+        const timeoutId = setTimeout(pollForBox, pollInterval);
+        trackTimeout(timeoutId);
+      } else {
+        // 2 seconds elapsed, no box found - continue current waiting loop
+        console.log('📦 Clickable box not found after 2 seconds, continuing current waiting in 1 second...');
+        const timeoutId = setTimeout(() => {
+          if (window.popmartHelper.isWaitingForCurrent) {
+            navigateToCartAndBack();
+          }
+        }, 1000);
+        trackTimeout(timeoutId);
+      }
+    }
+    
+    // Start the polling
+    pollForBox();
+  }
+
+  function stopCurrentWait() {
+    if (window.popmartHelper.isWaitingForCurrent) {
+      console.log('🛑 Stopping wait for current');
+      window.popmartHelper.isWaitingForCurrent = false;
+      updateStockButtonState();
+      
+      // Check if we're currently on a product page using URL pattern
+      if (!isOnProductPage()) {
+        console.log('⬅️ Not on product page, navigating back...');
+        window.history.back();
+        
+        // Wait a moment for navigation to complete, then verify
+        const timeoutId = setTimeout(() => {
+          if (isOnProductPage()) {
+            console.log('✅ Successfully returned to product page');
+          } else {
+            console.log('⚠️ May not be on product page yet, but current waiting is stopped');
+          }
+        }, 1000);
+        trackTimeout(timeoutId);
+      } else {
+        console.log('✅ Already on product page, no navigation needed');
+      }
+    }
+  }
 })();
